@@ -73,7 +73,7 @@ const checkUpdate = async () => {
     
 }
 
-const scheduledJobFunction = CronJob.schedule("45 19 * * *", () => {
+const scheduledJobFunction = CronJob.schedule("59 23 * * *", () => {
     checkUpdate()
 });
 
