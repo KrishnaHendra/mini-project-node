@@ -1,5 +1,4 @@
 import fetch from 'node-fetch'
-import CronJob from 'node-cron'
 import {db} from '../models/index.js'
 
 const Data = db.data
@@ -13,8 +12,6 @@ export const dataCovid = async () => {
 
 export const storeData = async (logHistory = {}) => {
     let getFromApi = await dataCovid()
-    
-    console.log(getFromApi.update.total)
 
     const newData = {
         penambahan: getFromApi.update.penambahan,
@@ -42,26 +39,26 @@ const findLastData = async () => {
     }
 } 
 
-const checkUpdate = async () => {
+export const checkUpdate = async (req, res) => {
     const newData = await dataCovid()
-    const lastDataCovid = await findLastData()
+    const lastData = await findLastData()
 
-    const penambahanNew = newData.update.penambahan
-    const penambahanLast = lastDataCovid.penambahan
-    const totalNew = newData.update.total
-    const totalLast = lastDataCovid.total
+    const newAdditional = newData.update.penambahan
+    const lastAdditional = lastData.penambahan
+    const newTotal = newData.update.total
+    const lastTotal = lastData.total
     let isDifferent = false
 
-    for (const [key, value] of Object.entries(penambahanNew)) {
-        if(penambahanNew[key] != penambahanLast[key]){
+    for (const [key, value] of Object.entries(newAdditional)) {
+        if(newAdditional[key] != lastAdditional[key]){
             isDifferent = true
         }
-        if(totalNew[key] != totalLast[key]){
+        if(newTotal[key] != lastTotal[key]){
             isDifferent = true
         }
     }     
 
-    const logHistory = {penambahan: penambahanLast, total: totalLast}
+    const logHistory = {penambahan: lastAdditional, total: lastTotal}
 
     if(isDifferent){
         // If there is a data change
@@ -70,11 +67,4 @@ const checkUpdate = async () => {
         // If there is no data change 
         console.log('No data change!')
     }
-    
 }
-
-const scheduledJobFunction = CronJob.schedule("59 23 * * *", () => {
-    checkUpdate()
-});
-
-scheduledJobFunction.start();

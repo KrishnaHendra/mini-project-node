@@ -1,22 +1,18 @@
 import express from 'express'
-import { storeData } from './src/controllers/covidController.js'
+import CronJob from 'node-cron'
+import { checkUpdate } from './src/controllers/covidController.js'
+import { router } from './src/routes/covidRoutes.js'
 
 const app = express()
 const port = 3000
 
 import('./src/configs/db.js')
 
-app.get('/', async (req,res) => {
-    const data = await(storeData())
-    res.json({
-        msg: 'Fetch Data Success!',
-        data
-    })
-})
+app.use(router)
 
-app.get('*', (req,res) => {
-    res.json('Page Not Found')
-})
+CronJob.schedule("59 23 * * *", () => {
+    checkUpdate()
+});
 
 app.listen(port, () => {
     console.log(`Server running in port ${port}`)
